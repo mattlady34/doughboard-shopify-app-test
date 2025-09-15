@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id          String    @id
+  shop        String
+  state       String
+  isOnline    Boolean   @default(false)
+  scope       String?
+  expires     DateTime?
+  accessToken String
+  userId      BigInt?
+  firstName   String?
+  lastName    String?
+  email       String?
+  accountOwner Boolean  @default(false)
+  locale      String?
+  collaborator Boolean? @default(false)
+  emailVerified Boolean? @default(false)
+}
+
+model StoreSettings {
+  id                    Int     @id @default(autoincrement())
+  shop                  String  @unique
+  defaultCOGSPercentage Float?  @default(30.0)
+  customCOGS           Json?   // JSON object with SKU -> COGS mappings
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model AdAccount {
+  id          Int      @id @default(autoincrement())
+  shop        String
+  platform    String   // 'meta', 'google', 'klaviyo', 'postscript'
+  accountId   String
+  accountName String?
+  accessToken String
+  refreshToken String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([shop, platform, accountId])
+}
+
+model CachedMetrics {
+  id        Int      @id @default(autoincrement())
+  shop      String
+  date      DateTime
+  revenue   Float    @default(0)
+  cogs      Float    @default(0)
+  adSpend   Float    @default(0)
+  orders    Int      @default(0)
+  newCustomers Int   @default(0)
+  createdAt DateTime @default(now())
+  
+  @@unique([shop, date])
+}
